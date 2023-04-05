@@ -1,75 +1,73 @@
 const client = require('./client')
 
-function getItem(itemId) {
-    return new Promise((resolve, reject) => {
-      client.getItem({ itemId }, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  }
-  
-  
-  function addItem(itemId, description, date) {
-    return new Promise((resolve, reject) => {
-      const item = { itemId, description, date };
-      client.addItem(item, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  }
-  
-  function updateItem(itemId, description, date) {
-    return new Promise((resolve, reject) => {
-      const item = { itemId, description, date };
-      client.updateItem(item, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  }
-  
-  function deleteItem(itemId) {
-    return new Promise((resolve, reject) => {
-      client.deleteItem({ itemId }, (error, response) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  }
-
-  async function test() {
-    try {
-      const newUser1 = await addItem('1', 'Desc 1', '21/04/2023');
-      console.log('addItem:', newUser1);
-  
-      const updatedUser = await updateItem(1, 'Desc 1 update', '21/04/2023');
-      console.log('updateItem:', updatedUser);
-
-      const newUser2 = await addItem('2', 'Desc 2', '19/09/1999');
-      console.log('addItem:', newUser2);
-  
-      const result = await deleteItem(2);
-      console.log('deleteItem:', result);
-
-      const user = await getItem(1);
-      console.log('getItem:', user);
-    } catch (error) {
-      console.error(error);
+function getItems() {
+  client.getItems({}, (error, response) => {
+    if(error){
+      console.log(error)
+    } else {
+      console.log(response.items)
     }
-  }
+  })
+}
   
-  test();
+function getItem(item_id) {
+  const data = { item_id }
+  client.getItem(data, (error, response) => {
+    if(error){
+      console.log(error)
+    }
+    else{
+      console.log(response)
+    }
+  })
+} 
+  
+function addItem(item_id, description, date) {
+  const data = { item_id, description, date }
+  client.addItem(data, (error, response) => {
+    if(error){
+      console.log(error)
+    }
+    else{
+      console.log(response)
+    }
+  })
+}
+  
+function updateItem(item_id, description, date){
+  const data = { item_id, description, date }
+  client.updateItem(data, (error, response) => {
+    if(error){
+      console.log(error)
+    }
+    else{
+      console.log(response)
+    }
+  })
+}
+
+function deleteItem(item_id, description, date){
+  const data = { item_id, description, date }
+  client.deleteItem(data, (error, response) => {
+    if(error){
+      console.log(error)
+    }
+    else{
+      console.log(response)
+    }
+  })
+}
+
+// addItem('1', 'Desc 1', '21/04/2023')
+
+// updateItem('1', 'Desc 1 update', '21/04/2023')
+    
+// addItem('2', 'Desc 2', '19/09/1999')
+  
+// deleteItem('2')
+
+// addItem('3', 'Desc 3', '24/07/2017')
+
+// getItem('1')
+
+getItems()

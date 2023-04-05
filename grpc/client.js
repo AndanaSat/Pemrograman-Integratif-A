@@ -3,7 +3,16 @@ const protoLoader = require("@grpc/proto-loader")
 
 const PROTO_PATH = "./jadwal.proto"
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH)
+const options =
+{
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+};
+
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, options)
 const itemProto = grpc.loadPackageDefinition(packageDefinition)
 
 const ItemService = itemProto.ItemService

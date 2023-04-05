@@ -4,7 +4,16 @@ const mysql = require('mysql2')
 
 const PROTO_PATH = './jadwal.proto'
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH)
+const options =
+{
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+};
+
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, options)
 const itemProto = grpc.loadPackageDefinition(packageDefinition)
 
 const pool = mysql.createPool({
@@ -19,26 +28,49 @@ const pool = mysql.createPool({
 const server = new grpc.Server()
 
 server.addService(itemProto.ItemService.service, {
-    getItem: (call, callback) => {
-        const item_id = call.request.item_id;
-        pool.query('SELECT * FROM items WHERE item_id = ?', [item_id], (error, result) => {
+    getItems: (call, callback) => {
+        pool.query('SELECT * FROM items', (error, results) => {
             if (error) {
                 console.error(error);
                 callback({ code: grpc.status.INTERNAL, message: "Internal Server Error" })
                 return
             }
-            else if (result.length === 0) {
+            else {
+                const items = results.map((result) => {
+                    return {
+                        item_id: result.item_id,
+                        description: result.description,
+                        date: result.date
+                    }
+                })
+                callback(null, { items });
+                return
+            }
+        })
+    },
+
+    getItem: (call, callback) => {
+        const item_id = call.request.item_id
+        pool.query('SELECT * FROM items WHERE item_id = ?', [item_id], (error, results) => {
+            if (error) {
+                console.error(error);
+                callback({ code: grpc.status.INTERNAL, message: "Internal Server Error" })
+                return
+            }
+            else if (results.length === 0) {
                 callback({ code: grpc.status.NOT_FOUND, message: "Item Not Found" })
                 return
             }
             else {
-                const itemData = results[0];
+                const itemData = results[0]
                 const item = {
                     item_id: itemData.item_id,
                     description: itemData.description,
-                    date: itemData.date 
+                    date: itemData.date
                 }
+                console.log(item)
                 callback(null, item)
+                return
             }
         })
     },
@@ -51,7 +83,6 @@ server.addService(itemProto.ItemService.service, {
             if (error) {
                 console.error(error)
                 callback({ code: grpc.status.INTERNAL, message: "Internal Server Error" })
-                return
             }
             else {
                 const item = { item_id, description, date }
@@ -68,7 +99,6 @@ server.addService(itemProto.ItemService.service, {
             if (error) {
                 console.error(error)
                 callback({grpc: grpc.status.INTERNAL, message: "Internal Server Error"})
-                return
             }
             else {
                 const item = { item_id, description, date }
@@ -83,10 +113,9 @@ server.addService(itemProto.ItemService.service, {
             if (error) {
                 console.error(error)
                 callback({ grpc: grpc.status.INTERNAL, message: "Internal Server Error" })
-                return
             }
             else{
-                callback(null, {})
+                callback(null, { item_id })
             }
         })
     }
